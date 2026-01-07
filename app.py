@@ -51,23 +51,26 @@ st.markdown("""
         gap: var(--space-xs);
         margin-bottom: var(--space-xs);
     }
-    h1 {
+    h1, h2, h3, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
         margin: 0 !important;
         font-size: 2rem !important;
         line-height: 1.2 !important;
         color: #1B5E20 !important;
+        cursor: default !important; /* 見出しはテキストカーソル回避のためdefault */
+        user-select: none;
     }
-    h2 {
-        margin: 0 !important;
-        font-size: 1.5rem !important;
-        line-height: 1.2 !important;
-        color: #1B5E20 !important;
+    
+    /* エクスパンダーのヘッダー部分を強制ポインターに */
+    .st-emotion-cache-16idsys p, .st-emotion-cache-16idsys summary, 
+    div[data-testid="stExpander"] > details > summary,
+    div[data-testid="stExpander"] > details > summary:hover {
+        cursor: pointer !important;
+        user-select: none !important;
     }
-    h3 {
-        margin: 0 !important;
-        font-size: 1.2rem !important;
-        line-height: 1.2 !important;
-        color: #1B5E20 !important;
+
+    /* アイコンユーティリティで生成した画像の親divもポインターに */
+    .header-container, .sidebar-header-container {
+        cursor: pointer !important;
     }
     /* 全てのボタン（ダウンロード、フィルタ等） */
     button[kind="primary"], button[kind="secondary"], .stDownloadButton > button {

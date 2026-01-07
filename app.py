@@ -37,32 +37,38 @@ st.markdown("""
         background-color: #F8F9FA;
         padding: var(--space-m);
     }
-    /* ヘッダー位置調整 (指カーソルに固定) */
-    .header-container, .sidebar-header-container {
+    /* ヘッダー位置調整 */
+    .header-container {
         display: flex;
         align-items: center;
-        cursor: pointer !important;
-        user-select: none;
-    }
-    .header-container {
         gap: var(--space-s);
         margin-top: var(--space-m);
         margin-bottom: var(--space-s);
     }
     .sidebar-header-container {
+        display: flex;
+        align-items: center;
         gap: var(--space-xs);
         margin-bottom: var(--space-xs);
     }
-    h1, h2, h3 {
+    h1 {
         margin: 0 !important;
+        font-size: 2rem !important;
         line-height: 1.2 !important;
         color: #1B5E20 !important;
-        cursor: pointer !important;
-        user-select: none;
     }
-    h1 { font-size: 2rem !important; }
-    h2 { font-size: 1.5rem !important; }
-    h3 { font-size: 1.2rem !important; }
+    h2 {
+        margin: 0 !important;
+        font-size: 1.5rem !important;
+        line-height: 1.2 !important;
+        color: #1B5E20 !important;
+    }
+    h3 {
+        margin: 0 !important;
+        font-size: 1.2rem !important;
+        line-height: 1.2 !important;
+        color: #1B5E20 !important;
+    }
     /* 全てのボタン（ダウンロード、フィルタ等） */
     button[kind="primary"], button[kind="secondary"], .stDownloadButton > button {
         background-color: #2E7D32 !important;

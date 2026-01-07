@@ -51,13 +51,27 @@ st.markdown("""
         gap: var(--space-xs);
         margin-bottom: var(--space-xs);
     }
+    /* 共通設定 (カーソル・色・マージン) */
     h1, h2, h3, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
         margin: 0 !important;
-        font-size: 2rem !important;
-        line-height: 1.2 !important;
         color: #1B5E20 !important;
-        cursor: default !important; /* 見出しはテキストカーソル回避のためdefault */
+        cursor: default !important;
         user-select: none;
+    }
+    
+    /* 8pxグリッドに基づく階層構造 */
+    h1, .stMarkdown h1 {
+        font-size: 32px !important; /* 4 units */
+        line-height: 1.5 !important;
+    }
+    h2, .stMarkdown h2 {
+        font-size: 24px !important; /* 3 units */
+        line-height: 1.33 !important;
+    }
+    h3, .stMarkdown h3 {
+        font-size: 16px !important; /* 2 units */
+        line-height: 1.5 !important;
+        font-weight: bold !important;
     }
     
     /* エクスパンダーのヘッダー部分を強制ポインターに */

@@ -25,51 +25,70 @@ st.set_page_config(
 # --- 共通スタイル設定 ---
 st.markdown("""
 <style>
+    /* 8pxグリッド & タイポグラフィ */
+    :root {
+        --grid-unit: 8px;
+        --space-xs: calc(var(--grid-unit) * 1); /* 8px */
+        --space-s:  calc(var(--grid-unit) * 2); /* 16px */
+        --space-m:  calc(var(--grid-unit) * 3); /* 24px */
+        --space-l:  calc(var(--grid-unit) * 4); /* 32px */
+    }
     .main {
-        background-color: #FFFFFF;
+        background-color: #FAFAFA;
+        padding: var(--space-m);
     }
-    .stTable {
-        background-color: white;
+    /* ヘッダー位置調整 */
+    .header-container {
+        display: flex;
+        align-items: center;
+        gap: var(--space-s);
+        margin-top: var(--space-m);
+        margin-bottom: var(--space-s);
     }
-    h1, h2, h3 {
+    .sidebar-header-container {
+        display: flex;
+        align-items: center;
+        gap: var(--space-xs);
+        margin-bottom: var(--space-xs);
+    }
+    h1 {
+        margin: 0 !important;
+        font-size: 2rem !important;
+        line-height: 1.2 !important;
         color: #1B5E20 !important;
-        display: flex !important;
-        align-items: center !important;
     }
-    /* 全てのボタン（ダウンロード、フィルタ等）の視認性向上 */
+    h2 {
+        margin: 0 !important;
+        font-size: 1.5rem !important;
+        line-height: 1.2 !important;
+        color: #1B5E20 !important;
+    }
+    h3 {
+        margin: 0 !important;
+        font-size: 1.2rem !important;
+        line-height: 1.2 !important;
+        color: #1B5E20 !important;
+    }
+    /* 全てのボタン（ダウンロード、フィルタ等） */
     button[kind="primary"], button[kind="secondary"], .stDownloadButton > button {
         background-color: #2E7D32 !important;
         color: white !important;
         border: 1px solid #1B5E20 !important;
         font-weight: bold !important;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-    /* ボタンラベルを強制表示 (全要素を白に) */
-    button[kind="primary"] *, button[kind="secondary"] *, .stDownloadButton > button * {
-        color: white !important;
-        margin: 0 !important;
-        font-size: 1.2rem !important;
-        text-align: center !important;
-    }
-    button[kind="primary"]:hover, button[kind="secondary"]:hover, .stDownloadButton > button:hover {
-        background-color: #1B5E20 !important;
-        border-color: #1B5E20 !important;
-    }
-    /* 非活性ボタンのコントラスト */
-    button:disabled {
-        background-color: #F5F5F5 !important;
-        color: #BDBDBD !important;
-        border-color: #EEEEEE !important;
+        border-radius: 4px !important;
+        padding: var(--space-xs) var(--space-s) !important;
+        height: auto !important;
     }
     /* ページネーション表示 */
     .page-info {
         color: #2E7D32;
         font-weight: bold;
-        font-size: 1.2em;
-        padding-top: 5px;
+        font-size: 1.1em;
+        margin: 0 !important;
+    }
+    /* グラフ等のコンテナ余白 */
+    .stPlotlyChart {
+        margin-top: var(--space-s);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -82,25 +101,33 @@ def get_base64_of_bin_file(bin_file):
         data = f.read()
     return base64.b64encode(data).decode()
 
+# --- アイコンユーティリティ ---
 def img_to_html(img_path, width=28):
     try:
         full_path = os.path.join(BASE_DIR, img_path) if not os.path.isabs(img_path) else img_path
-        if not os.path.exists(full_path):
-            return f"<!-- File not found: {full_path} -->"
         with open(full_path, "rb") as f:
             img_data = f.read()
         img_64 = base64.b64encode(img_data).decode()
-        return f'<img src="data:image/png;base64,{img_64}" width="{width}" style="vertical-align: middle; margin-right: 10px; margin-bottom: 4px; display: inline-block;">'
+        return f'<img src="data:image/png;base64,{img_64}" width="{width}" style="display: block;">'
     except Exception as e:
-        return f"<!-- Error: {str(e)} -->"
+        return f"<!-- Icon Error: {str(e)} -->"
+
+def render_header(level, icon_path, text, icon_size=28, is_sidebar=False):
+    container_class = "sidebar-header-container" if is_sidebar else "header-container"
+    tag = f"h{level}"
+    html = f'''
+    <div class="{container_class}">
+        {img_to_html(icon_path, icon_size)}
+        <{tag}>{text}</{tag}>
+    </div>
+    '''
+    if is_sidebar:
+        st.sidebar.markdown(html, unsafe_allow_html=True)
+    else:
+        st.markdown(html, unsafe_allow_html=True)
 
 # --- サイドバー ---
-with st.sidebar:
-    col_s1, col_s2 = st.columns([1, 4])
-    with col_s1:
-        st.image(os.path.join(BASE_DIR, "assets", "icon_settings.png"), width=32)
-    with col_s2:
-        st.markdown("## 設定")
+render_header(2, "assets/icon_settings.png", "設定", 32, is_sidebar=True)
 st.sidebar.markdown("---")
 
 # 期間フィルタ (デフォルトを60日間に延長)
@@ -108,32 +135,19 @@ today = datetime.now()
 start_date_val = today - timedelta(days=60)
 end_date_val = today
 
-st.sidebar.markdown("") # スペーサー
-col_c1, col_c2 = st.sidebar.columns([1, 4])
-with col_c1:
-    st.image(os.path.join(BASE_DIR, "assets", "icon_calendar.png"), width=24)
-with col_c2:
-    st.markdown("### 期間フィルタ")
+st.sidebar.markdown('<div style="height: 16px;"></div>', unsafe_allow_html=True) # 8pxグリッド調整
+render_header(3, "assets/icon_calendar.png", "期間フィルタ", 24, is_sidebar=True)
 start_date = st.sidebar.date_input("開始日", start_date_val)
 end_date = st.sidebar.date_input("終了日", end_date_val)
 
 apply_filter = st.sidebar.button("フィルタ適用", width='stretch')
 
 st.sidebar.markdown("---")
-col_e1, col_e2 = st.sidebar.columns([1, 4])
-with col_e1:
-    st.image(os.path.join(BASE_DIR, "assets", "icon_export.png"), width=24)
-with col_e2:
-    st.markdown("### エクスポート")
+render_header(3, "assets/icon_export.png", "エクスポート", 24, is_sidebar=True)
 
 # --- メインエリア ---
-col_t1, col_t2 = st.columns([1, 10])
-with col_t1:
-    st.image(os.path.join(BASE_DIR, "assets", "icon_dashboard.png"), width=64)
-with col_t2:
-    st.title("チャットログ分析ダッシュボード")
-
-st.markdown("### 仮想ヘルプAI 会話ログ分析")
+render_header(1, "assets/icon_dashboard.png", "チャットログ分析ダッシュボード", 48)
+st.markdown('<p style="margin-bottom: 24px; color: #666;">仮想ヘルプAI 会話ログ分析</p>', unsafe_allow_html=True)
 st.info(f"📍 データソース: 仮想ヘルプデスクチャット (最終更新: {today.strftime('%Y-%m-%d %H:%M')})")
 
 # データの読み込み
@@ -184,11 +198,7 @@ category_counts = analyzer.aggregate_data(filtered_df)
 col1, col2 = st.columns([1, 1])
 
 with col1:
-    col_k1, col_k2 = st.columns([1, 8])
-    with col_k1:
-        st.image(os.path.join(BASE_DIR, "assets", "icon_keywords.png"), width=32)
-    with col_k2:
-        st.markdown("### 頻出キーワード TOP 10")
+    render_header(3, "assets/icon_keywords.png", "頻出キーワード TOP 10", 28)
     if keywords:
         kw_df = pd.DataFrame(keywords)
         kw_df.columns = ["キーワード", "出現回数", "割合 (%)"]
@@ -197,11 +207,7 @@ with col1:
         st.write("該当データがありません")
 
 with col2:
-    col_p1, col_p2 = st.columns([1, 8])
-    with col_p1:
-        st.image(os.path.join(BASE_DIR, "assets", "icon_piechart.png"), width=32)
-    with col_p2:
-        st.markdown("### カテゴリ別集計")
+    render_header(3, "assets/icon_piechart.png", "カテゴリ別集計", 28)
     if category_counts:
         fig = go.Figure(data=[go.Pie(
             labels=list(category_counts.keys()),
@@ -221,11 +227,7 @@ with col2:
 st.markdown("---")
 
 # 詳細ログ
-col_l1, col_l2 = st.columns([1, 15])
-with col_l1:
-    st.image(os.path.join(BASE_DIR, "assets", "icon_log.png"), width=32)
-with col_l2:
-    st.markdown("### 詳細ログ表示")
+render_header(3, "assets/icon_log.png", "詳細ログ表示", 28)
 selected_cat = st.selectbox("カテゴリで絞り込み", ["すべて"] + list(category_counts.keys()))
 
 display_df = filtered_df.copy()

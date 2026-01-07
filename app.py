@@ -97,6 +97,7 @@ st.markdown("""
         height: auto !important;
     }
     /* ページネーション表示 */
+    /* ページネーション表示 */
     .page-info {
         color: #2E7D32;
         font-weight: bold;
@@ -106,6 +107,11 @@ st.markdown("""
     /* グラフ等のコンテナ余白 */
     .stPlotlyChart {
         margin-top: var(--space-s);
+    }
+    /* Plotlyのツールバーアイコンを拡大 */
+    .modebar-btn {
+        transform: scale(1.5);
+        margin: 0 4px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -227,7 +233,8 @@ with col2:
         fig.update_layout(
             margin=dict(t=0, b=20, l=0, r=0),
             height=350,
-            showlegend=True
+            showlegend=True,
+            legend=dict(font=dict(size=14)) # 凡例テキストを本文サイズ(14px)に
         )
         st.plotly_chart(fig, use_container_width=True)
     else:

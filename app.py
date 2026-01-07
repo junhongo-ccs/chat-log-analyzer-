@@ -84,12 +84,24 @@ def get_base64_of_bin_file(bin_file):
 
 def img_to_html(img_path, width=28):
     try:
-        img_64 = get_base64_of_bin_file(img_path)
-        return f'<img src="data:image/png;base64,{img_64}" width="{width}" style="vertical-align: middle; margin-right: 10px; margin-bottom: 4px;">'
+        full_path = os.path.join(BASE_DIR, img_path) if not os.path.isabs(img_path) else img_path
+        if not os.path.exists(full_path):
+            return f"<!-- File not found: {full_path} -->"
+        with open(full_path, "rb") as f:
+            img_data = f.read()
+        img_64 = base64.b64encode(img_data).decode()
+        return f'<img src="data:image/png;base64,{img_64}" width="{width}" style="vertical-align: middle; margin-right: 10px; margin-bottom: 4px; display: inline-block;">'
     except Exception as e:
         return f"<!-- Error: {str(e)} -->"
 
 # --- サイドバー ---
+with st.sidebar.expander("🛠 Debug Assets", expanded=False):
+    st.write(f"BASE_DIR: {BASE_DIR}")
+    if os.path.exists(os.path.join(BASE_DIR, "assets")):
+        st.write(f"Assets: {os.listdir(os.path.join(BASE_DIR, 'assets'))}")
+    else:
+        st.error("Assets folder not found!")
+    st.write("Icon HTML sample:", img_to_html('assets/icon_settings.png'))
 st.sidebar.markdown(f"## {img_to_html('assets/icon_settings.png')} 設定", unsafe_allow_html=True)
 st.sidebar.markdown("---")
 

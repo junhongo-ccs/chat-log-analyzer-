@@ -102,7 +102,7 @@ with st.sidebar.expander("🛠 Debug Assets", expanded=False):
     else:
         st.error("Assets folder not found!")
     st.write("Icon HTML sample:", img_to_html('assets/icon_settings.png'))
-st.sidebar.markdown(f"## {img_to_html('assets/icon_settings.png')} 設定", unsafe_allow_html=True)
+st.sidebar.markdown(f'<div style="display: flex; align-items: center;">{img_to_html("assets/icon_settings.png")} <h2 style="margin: 0; color: #1B5E20;">設定</h2></div>', unsafe_allow_html=True)
 st.sidebar.markdown("---")
 
 # 期間フィルタ (デフォルトを60日間に延長)
@@ -120,7 +120,12 @@ st.sidebar.markdown("---")
 st.sidebar.markdown(f"### {img_to_html('assets/icon_export.png', 24)} エクスポート", unsafe_allow_html=True)
 
 # --- メインエリア ---
-st.markdown(f"<h1>{img_to_html('assets/icon_dashboard.png', 40)} チャットログ分析ダッシュボード (PRO)</h1>", unsafe_allow_html=True)
+st.markdown(f'''
+<div style="display: flex; align-items: center; margin-bottom: 20px;">
+    {img_to_html("assets/icon_dashboard.png", 48)}
+    <h1 style="margin: 0; margin-left: 15px;">チャットログ分析ダッシュボード (PRO)</h1>
+</div>
+''', unsafe_allow_html=True)
 st.markdown("### 仮想ヘルプAI 会話ログ分析")
 st.info(f"📍 データソース: 仮想ヘルプデスクチャット (最終更新: {today.strftime('%Y-%m-%d %H:%M')})")
 

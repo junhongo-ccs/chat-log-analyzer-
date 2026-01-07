@@ -12,10 +12,13 @@ from dotenv import load_dotenv
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or st.secrets.get("GEMINI_API_KEY", "")
 
+# 実行ファイルのディレクトリを取得
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # ページ設定
 st.set_page_config(
     page_title="チャットログ分析ダッシュボード",
-    page_icon="assets/icon_dashboard.png",
+    page_icon=os.path.join(BASE_DIR, "assets", "icon_dashboard.png"),
     layout="wide"
 )
 
@@ -73,6 +76,8 @@ st.markdown("""
 
 # --- アイコンユーティリティ ---
 def get_base64_of_bin_file(bin_file):
+    if not os.path.isabs(bin_file):
+        bin_file = os.path.join(BASE_DIR, bin_file)
     with open(bin_file, 'rb') as f:
         data = f.read()
     return base64.b64encode(data).decode()
@@ -81,8 +86,8 @@ def img_to_html(img_path, width=28):
     try:
         img_64 = get_base64_of_bin_file(img_path)
         return f'<img src="data:image/png;base64,{img_64}" width="{width}" style="vertical-align: middle; margin-right: 10px; margin-bottom: 4px;">'
-    except Exception:
-        return ""
+    except Exception as e:
+        return f"<!-- Error: {str(e)} -->"
 
 # --- サイドバー ---
 st.sidebar.markdown(f"## {img_to_html('assets/icon_settings.png')} 設定", unsafe_allow_html=True)
@@ -103,7 +108,7 @@ st.sidebar.markdown("---")
 st.sidebar.markdown(f"### {img_to_html('assets/icon_export.png', 24)} エクスポート", unsafe_allow_html=True)
 
 # --- メインエリア ---
-st.markdown(f"<h1>{img_to_html('assets/icon_dashboard.png', 40)} チャットログ分析ダッシュボード</h1>", unsafe_allow_html=True)
+st.markdown(f"<h1>{img_to_html('assets/icon_dashboard.png', 40)} チャットログ分析ダッシュボード (PRO)</h1>", unsafe_allow_html=True)
 st.markdown("### 仮想ヘルプAI 会話ログ分析")
 st.info(f"📍 データソース: 仮想ヘルプデスクチャット (最終更新: {today.strftime('%Y-%m-%d %H:%M')})")
 

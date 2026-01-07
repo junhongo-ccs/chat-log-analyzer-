@@ -34,7 +34,7 @@ st.markdown("""
         --space-l:  calc(var(--grid-unit) * 4); /* 32px */
     }
     .main {
-        background-color: #FAFAFA;
+        background-color: #F8F9FA;
         padding: var(--space-m);
     }
     /* ヘッダー位置調整 */
@@ -93,22 +93,14 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- アイコンユーティリティ ---
-def get_base64_of_bin_file(bin_file):
-    if not os.path.isabs(bin_file):
-        bin_file = os.path.join(BASE_DIR, bin_file)
-    with open(bin_file, 'rb') as f:
-        data = f.read()
-    return base64.b64encode(data).decode()
-
-# --- アイコンユーティリティ ---
+# --- ユーティリティ ---
 def img_to_html(img_path, width=28):
     try:
         full_path = os.path.join(BASE_DIR, img_path) if not os.path.isabs(img_path) else img_path
         with open(full_path, "rb") as f:
             img_data = f.read()
         img_64 = base64.b64encode(img_data).decode()
-        return f'<img src="data:image/png;base64,{img_64}" width="{width}" style="display: block;">'
+        return f'<img src="data:image/png;base64,{img_64}" width="{width}" style="display: block; user-select: none;">'
     except Exception as e:
         return f"<!-- Icon Error: {str(e)} -->"
 

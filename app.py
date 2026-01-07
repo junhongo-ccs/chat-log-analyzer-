@@ -100,7 +100,7 @@ def img_to_html(img_path, width=28):
         with open(full_path, "rb") as f:
             img_data = f.read()
         img_64 = base64.b64encode(img_data).decode()
-        return f'<img src="data:image/png;base64,{img_64}" width="{width}" style="display: block; user-select: none;">'
+        return f'<img src="data:image/png;base64,{img_64}" width="{width}" style="display: block; user-select: none; cursor: pointer;">'
     except Exception as e:
         return f"<!-- Icon Error: {str(e)} -->"
 

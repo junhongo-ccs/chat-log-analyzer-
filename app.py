@@ -95,14 +95,12 @@ def img_to_html(img_path, width=28):
         return f"<!-- Error: {str(e)} -->"
 
 # --- サイドバー ---
-with st.sidebar.expander("🛠 Debug Assets", expanded=False):
-    st.write(f"BASE_DIR: {BASE_DIR}")
-    if os.path.exists(os.path.join(BASE_DIR, "assets")):
-        st.write(f"Assets: {os.listdir(os.path.join(BASE_DIR, 'assets'))}")
-    else:
-        st.error("Assets folder not found!")
-    st.write("Icon HTML sample:", img_to_html('assets/icon_settings.png'))
-st.sidebar.markdown(f'<div style="display: flex; align-items: center;">{img_to_html("assets/icon_settings.png")} <h2 style="margin: 0; color: #1B5E20;">設定</h2></div>', unsafe_allow_html=True)
+with st.sidebar:
+    col_s1, col_s2 = st.columns([1, 4])
+    with col_s1:
+        st.image(os.path.join(BASE_DIR, "assets", "icon_settings.png"), width=32)
+    with col_s2:
+        st.markdown("## 設定")
 st.sidebar.markdown("---")
 
 # 期間フィルタ (デフォルトを60日間に延長)
@@ -110,22 +108,31 @@ today = datetime.now()
 start_date_val = today - timedelta(days=60)
 end_date_val = today
 
-st.sidebar.markdown(f"### {img_to_html('assets/icon_calendar.png', 24)} 期間フィルタ", unsafe_allow_html=True)
+st.sidebar.markdown("") # スペーサー
+col_c1, col_c2 = st.sidebar.columns([1, 4])
+with col_c1:
+    st.image(os.path.join(BASE_DIR, "assets", "icon_calendar.png"), width=24)
+with col_c2:
+    st.markdown("### 期間フィルタ")
 start_date = st.sidebar.date_input("開始日", start_date_val)
 end_date = st.sidebar.date_input("終了日", end_date_val)
 
 apply_filter = st.sidebar.button("フィルタ適用", width='stretch')
 
 st.sidebar.markdown("---")
-st.sidebar.markdown(f"### {img_to_html('assets/icon_export.png', 24)} エクスポート", unsafe_allow_html=True)
+col_e1, col_e2 = st.sidebar.columns([1, 4])
+with col_e1:
+    st.image(os.path.join(BASE_DIR, "assets", "icon_export.png"), width=24)
+with col_e2:
+    st.markdown("### エクスポート")
 
 # --- メインエリア ---
-st.markdown(f'''
-<div style="display: flex; align-items: center; margin-bottom: 20px;">
-    {img_to_html("assets/icon_dashboard.png", 48)}
-    <h1 style="margin: 0; margin-left: 15px;">チャットログ分析ダッシュボード (PRO)</h1>
-</div>
-''', unsafe_allow_html=True)
+col_t1, col_t2 = st.columns([1, 10])
+with col_t1:
+    st.image(os.path.join(BASE_DIR, "assets", "icon_dashboard.png"), width=64)
+with col_t2:
+    st.title("チャットログ分析ダッシュボード")
+
 st.markdown("### 仮想ヘルプAI 会話ログ分析")
 st.info(f"📍 データソース: 仮想ヘルプデスクチャット (最終更新: {today.strftime('%Y-%m-%d %H:%M')})")
 
@@ -177,7 +184,11 @@ category_counts = analyzer.aggregate_data(filtered_df)
 col1, col2 = st.columns([1, 1])
 
 with col1:
-    st.markdown(f"### {img_to_html('assets/icon_keywords.png', 28)} 頻出キーワード TOP 10", unsafe_allow_html=True)
+    col_k1, col_k2 = st.columns([1, 8])
+    with col_k1:
+        st.image(os.path.join(BASE_DIR, "assets", "icon_keywords.png"), width=32)
+    with col_k2:
+        st.markdown("### 頻出キーワード TOP 10")
     if keywords:
         kw_df = pd.DataFrame(keywords)
         kw_df.columns = ["キーワード", "出現回数", "割合 (%)"]
@@ -186,7 +197,11 @@ with col1:
         st.write("該当データがありません")
 
 with col2:
-    st.markdown(f"### {img_to_html('assets/icon_piechart.png', 28)} カテゴリ別集計", unsafe_allow_html=True)
+    col_p1, col_p2 = st.columns([1, 8])
+    with col_p1:
+        st.image(os.path.join(BASE_DIR, "assets", "icon_piechart.png"), width=32)
+    with col_p2:
+        st.markdown("### カテゴリ別集計")
     if category_counts:
         fig = go.Figure(data=[go.Pie(
             labels=list(category_counts.keys()),
@@ -206,7 +221,11 @@ with col2:
 st.markdown("---")
 
 # 詳細ログ
-st.markdown(f"### {img_to_html('assets/icon_log.png', 28)} 詳細ログ表示", unsafe_allow_html=True)
+col_l1, col_l2 = st.columns([1, 15])
+with col_l1:
+    st.image(os.path.join(BASE_DIR, "assets", "icon_log.png"), width=32)
+with col_l2:
+    st.markdown("### 詳細ログ表示")
 selected_cat = st.selectbox("カテゴリで絞り込み", ["すべて"] + list(category_counts.keys()))
 
 display_df = filtered_df.copy()

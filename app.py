@@ -113,6 +113,10 @@ st.markdown("""
         transform: scale(1.5);
         margin: 0 4px;
     }
+    /* グラフのスクロールバーを非表示（ビジュアルノイズ除去） */
+    .user-select-none.svg-container {
+        overflow: hidden !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -217,7 +221,8 @@ with col1:
     if keywords:
         kw_df = pd.DataFrame(keywords)
         kw_df.columns = ["キーワード", "出現回数", "割合 (%)"]
-        st.dataframe(kw_df, width='stretch', hide_index=True)
+        km_height = (len(kw_df) + 1) * 35 + 3 # ヘッダー+データ行の高さ計算
+        st.dataframe(kw_df, use_container_width=True, hide_index=True, height=km_height)
     else:
         st.write("該当データがありません")
 
@@ -231,7 +236,8 @@ with col2:
             marker=dict(colors=['#81C784', '#FFF176', '#E57373', '#64B5F6', '#BA68C8'])
         )])
         fig.update_layout(
-            margin=dict(t=0, b=20, l=0, r=0),
+        fig.update_layout(
+            margin=dict(t=0, b=0, l=0, r=0),
             height=350,
             showlegend=True,
             legend=dict(font=dict(size=14)) # 凡例テキストを本文サイズ(14px)に

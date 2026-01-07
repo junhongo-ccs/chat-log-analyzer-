@@ -49,6 +49,25 @@
 4. **デプロイ完了:**
    - 数分でデプロイが完了し、公開URLが発行されます。
 
+## 開発ツール (Linting & Formatting)
+
+開発時のコード品質を保つために [Ruff](https://docs.astral.sh/ruff/) を導入しています。
+
+1. **コードのチェック (Lint):**
+   ```bash
+   ruff check .
+   ```
+
+2. **自動修正 (Auto-fix):**
+   ```bash
+   ruff check --fix .
+   ```
+
+3. **フォーマット (Format):**
+   ```bash
+   ruff format .
+   ```
+
 ## ファイル構成
 - `app.py`: メインのUI (Streamlit)
 - `analyzer.py`: 分析ロジック

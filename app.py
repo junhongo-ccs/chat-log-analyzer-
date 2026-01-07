@@ -1,12 +1,14 @@
-import streamlit as st
-import pandas as pd
-import plotly.graph_objects as go
+import base64
+import os
 import time
 from datetime import datetime, timedelta
-import analyzer
-import os
-import base64
+
+import pandas as pd
+import plotly.graph_objects as go
+import streamlit as st
 from dotenv import load_dotenv
+
+import analyzer
 
 # 環境変数の読み込み
 load_dotenv()
@@ -19,11 +21,12 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 st.set_page_config(
     page_title="チャットログ分析ダッシュボード",
     page_icon=os.path.join(BASE_DIR, "assets", "icon_dashboard.png"),
-    layout="wide"
+    layout="wide",
 )
 
 # --- 共通スタイル設定 ---
-st.markdown("""
+st.markdown(
+    """
 <style>
     /* 8pxグリッド & タイポグラフィ */
     :root {
@@ -58,7 +61,7 @@ st.markdown("""
         cursor: default !important;
         user-select: none;
     }
-    
+
     /* 8pxグリッドに基づく階層構造 */
     h1, .stMarkdown h1 {
         font-size: 32px !important; /* 4 units */
@@ -73,9 +76,9 @@ st.markdown("""
         line-height: 1.5 !important;
         font-weight: bold !important;
     }
-    
+
     /* エクスパンダーのヘッダー部分を強制ポインターに */
-    .st-emotion-cache-16idsys p, .st-emotion-cache-16idsys summary, 
+    .st-emotion-cache-16idsys p, .st-emotion-cache-16idsys summary,
     div[data-testid="stExpander"] > details > summary,
     div[data-testid="stExpander"] > details > summary:hover {
         cursor: pointer !important;
@@ -118,18 +121,26 @@ st.markdown("""
         overflow: hidden !important;
     }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
+
 
 # --- ユーティリティ ---
 def img_to_html(img_path, width=28):
     try:
-        full_path = os.path.join(BASE_DIR, img_path) if not os.path.isabs(img_path) else img_path
+        full_path = (
+            os.path.join(BASE_DIR, img_path)
+            if not os.path.isabs(img_path)
+            else img_path
+        )
         with open(full_path, "rb") as f:
             img_data = f.read()
         img_64 = base64.b64encode(img_data).decode()
         return f'<img src="data:image/png;base64,{img_64}" width="{width}" style="display: block; user-select: none; cursor: pointer;">'
     except Exception as e:
         return f"<!-- Icon Error: {str(e)} -->"
+
 
 def render_header(level, icon_path, text, icon_size=28, is_sidebar=False):
     container_class = "sidebar-header-container" if is_sidebar else "header-container"
@@ -145,6 +156,7 @@ def render_header(level, icon_path, text, icon_size=28, is_sidebar=False):
     else:
         st.markdown(html, unsafe_allow_html=True)
 
+
 # --- サイドバー ---
 render_header(2, "assets/icon_settings.png", "設定", 32, is_sidebar=True)
 st.sidebar.markdown("---")
@@ -154,42 +166,51 @@ today = datetime.now()
 start_date_val = today - timedelta(days=60)
 end_date_val = today
 
-st.sidebar.markdown('<div style="height: 16px;"></div>', unsafe_allow_html=True) # 8pxグリッド調整
+st.sidebar.markdown(
+    '<div style="height: 16px;"></div>', unsafe_allow_html=True
+)  # 8pxグリッド調整
 render_header(3, "assets/icon_calendar.png", "期間フィルタ", 24, is_sidebar=True)
 start_date = st.sidebar.date_input("開始日", start_date_val)
 end_date = st.sidebar.date_input("終了日", end_date_val)
 
-apply_filter = st.sidebar.button("フィルタ適用", width='stretch')
+apply_filter = st.sidebar.button("フィルタ適用", width="stretch")
 
 st.sidebar.markdown("---")
 render_header(3, "assets/icon_export.png", "エクスポート", 24, is_sidebar=True)
 
 # --- メインエリア ---
 render_header(1, "assets/icon_dashboard.png", "チャットログ分析ダッシュボード", 48)
-st.markdown('<p style="margin-bottom: 24px; color: #666;">仮想ヘルプAI 会話ログ分析</p>', unsafe_allow_html=True)
-st.info(f"📍 データソース: 仮想ヘルプデスクチャット (最終更新: {today.strftime('%Y-%m-%d %H:%M')})")
+st.markdown(
+    '<p style="margin-bottom: 24px; color: #666;">仮想ヘルプAI 会話ログ分析</p>',
+    unsafe_allow_html=True,
+)
+st.info(
+    f"📍 データソース: 仮想ヘルプデスクチャット (最終更新: {today.strftime('%Y-%m-%d %H:%M')})"
+)
+
 
 # データの読み込み
 @st.cache_data
 def get_raw_data():
     return analyzer.load_data("data/sample_chat.csv")
 
+
 raw_df = get_raw_data()
 
 # フィルタリング
 filtered_df = raw_df[
-    (raw_df['timestamp'].dt.date >= start_date) & 
-    (raw_df['timestamp'].dt.date <= end_date)
+    (raw_df["timestamp"].dt.date >= start_date)
+    & (raw_df["timestamp"].dt.date <= end_date)
 ].copy()
 
 # データ取得演出 (初回またはフィルタ適用時)
-if 'fetched' not in st.session_state or apply_filter:
+if "fetched" not in st.session_state or apply_filter:
     progress_bar = st.progress(0)
     status_text = st.empty()
     for i in range(100):
-        time.sleep(0.01) # シミュレーション
+        time.sleep(0.01)  # シミュレーション
         progress_bar.progress(i + 1)
-        status_text.text(f"データ取得中... {i+1}%")
+        status_text.text(f"データ取得中... {i + 1}%")
     status_text.success("データの取得が完了しました")
     time.sleep(0.5)
     status_text.empty()
@@ -199,13 +220,15 @@ if 'fetched' not in st.session_state or apply_filter:
 # --- 分析処理 ---
 
 # キーワード抽出
-keywords = analyzer.extract_keywords(filtered_df['message'].tolist())
+keywords = analyzer.extract_keywords(filtered_df["message"].tolist())
 
 # カテゴリ分類 (セッション状態に保存して再計算を防ぐ)
-if 'classified_df' not in st.session_state or apply_filter:
+if "classified_df" not in st.session_state or apply_filter:
     with st.spinner("AIによるカテゴリ分類を実行中..."):
-        categories = analyzer.classify_category_ai(filtered_df['message'].tolist(), GEMINI_API_KEY)
-        filtered_df['category'] = categories
+        categories = analyzer.classify_category_ai(
+            filtered_df["message"].tolist(), GEMINI_API_KEY
+        )
+        filtered_df["category"] = categories
         st.session_state.classified_df = filtered_df
 else:
     filtered_df = st.session_state.classified_df
@@ -221,7 +244,7 @@ with col1:
     if keywords:
         kw_df = pd.DataFrame(keywords)
         kw_df.columns = ["キーワード", "出現回数", "割合 (%)"]
-        km_height = (len(kw_df) + 1) * 35 + 3 # ヘッダー+データ行の高さ計算
+        km_height = (len(kw_df) + 1) * 35 + 3  # ヘッダー+データ行の高さ計算
         st.dataframe(kw_df, use_container_width=True, hide_index=True, height=km_height)
     else:
         st.write("該当データがありません")
@@ -229,17 +252,23 @@ with col1:
 with col2:
     render_header(3, "assets/icon_piechart.png", "カテゴリ別集計", 28)
     if category_counts:
-        fig = go.Figure(data=[go.Pie(
-            labels=list(category_counts.keys()),
-            values=list(category_counts.values()),
-            hole=.3,
-            marker=dict(colors=['#81C784', '#FFF176', '#E57373', '#64B5F6', '#BA68C8'])
-        )])
+        fig = go.Figure(
+            data=[
+                go.Pie(
+                    labels=list(category_counts.keys()),
+                    values=list(category_counts.values()),
+                    hole=0.3,
+                    marker=dict(
+                        colors=["#81C784", "#FFF176", "#E57373", "#64B5F6", "#BA68C8"]
+                    ),
+                )
+            ]
+        )
         fig.update_layout(
             margin=dict(t=20, b=50, l=20, r=20),
             height=400,
             showlegend=True,
-            legend=dict(font=dict(size=14)) # 凡例テキストを本文サイズ(14px)に
+            legend=dict(font=dict(size=14)),  # 凡例テキストを本文サイズ(14px)に
         )
         st.plotly_chart(fig, use_container_width=True)
     else:
@@ -249,58 +278,77 @@ st.markdown("---")
 
 # 詳細ログ
 render_header(3, "assets/icon_log.png", "詳細ログ表示", 28)
-selected_cat = st.selectbox("カテゴリで絞り込み", ["すべて"] + list(category_counts.keys()))
+selected_cat = st.selectbox(
+    "カテゴリで絞り込み", ["すべて"] + list(category_counts.keys())
+)
 
 display_df = filtered_df.copy()
 if selected_cat != "すべて":
-    display_df = display_df[display_df['category'] == selected_cat]
+    display_df = display_df[display_df["category"] == selected_cat]
 
 with st.expander("ログ一覧を表示", expanded=True):
     # 分類フィルタ適用後のデータ
-    display_df = display_df.sort_values('timestamp', ascending=False)
-    
+    display_df = display_df.sort_values("timestamp", ascending=False)
+
     # --- ページ送り機能 (Pagination) ---
     items_per_page = 20
     total_pages = (len(display_df) - 1) // items_per_page + 1
-    
-    if 'current_page' not in st.session_state or apply_filter:
+
+    if "current_page" not in st.session_state or apply_filter:
         st.session_state.current_page = 1
-        
+
     col_p1, col_p2, col_p3 = st.columns([1, 1, 1])
-    
+
     with col_p1:
-        if st.button("＜", key="prev_p", disabled=(st.session_state.current_page <= 1), width='stretch'):
+        if st.button(
+            "＜",
+            key="prev_p",
+            disabled=(st.session_state.current_page <= 1),
+            width="stretch",
+        ):
             st.session_state.current_page -= 1
             st.rerun()
-            
+
     with col_p2:
-        st.markdown(f"<p class='page-info' style='text-align: center; line-height: 2.5;'>{st.session_state.current_page} / {total_pages}</p>", unsafe_allow_html=True)
-        
+        st.markdown(
+            f"<p class='page-info' style='text-align: center; line-height: 2.5;'>{st.session_state.current_page} / {total_pages}</p>",
+            unsafe_allow_html=True,
+        )
+
     with col_p3:
-        if st.button("＞", key="next_p", disabled=(st.session_state.current_page >= total_pages), width='stretch'):
+        if st.button(
+            "＞",
+            key="next_p",
+            disabled=(st.session_state.current_page >= total_pages),
+            width="stretch",
+        ):
             st.session_state.current_page += 1
             st.rerun()
 
     # ページに応じたスライス
     start_idx = (st.session_state.current_page - 1) * items_per_page
     end_idx = start_idx + items_per_page
-    
+
     st.dataframe(
-        display_df.iloc[start_idx:end_idx][['timestamp', 'user_id', 'message', 'category']],
-        width='stretch',
-        hide_index=True
+        display_df.iloc[start_idx:end_idx][
+            ["timestamp", "user_id", "message", "category"]
+        ],
+        width="stretch",
+        hide_index=True,
     )
-    
-    st.info(f"💡 全 {len(display_df)} 件中 {start_idx + 1} 〜 {min(end_idx, len(display_df))} 件を表示中")
+
+    st.info(
+        f"💡 全 {len(display_df)} 件中 {start_idx + 1} 〜 {min(end_idx, len(display_df))} 件を表示中"
+    )
 
 # ダウンロードボタン (サイドバー)
-csv = display_df.to_csv(index=False, encoding='utf-8-sig')
+csv = display_df.to_csv(index=False, encoding="utf-8-sig")
 st.sidebar.download_button(
     label="CSVダウンロード",
     data=csv,
     file_name=f"chat_analysis_{datetime.now().strftime('%Y%m%d')}.csv",
     mime="text/csv",
-    width='stretch'
+    width="stretch",
 )
 
 st.sidebar.markdown(f"**表示件数:** {len(display_df)} 件")

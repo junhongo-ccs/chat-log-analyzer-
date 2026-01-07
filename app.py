@@ -208,11 +208,12 @@ with col2:
             marker=dict(colors=['#81C784', '#FFF176', '#E57373', '#64B5F6', '#BA68C8'])
         )])
         fig.update_layout(
-            margin=dict(t=0, b=0, l=0, r=0),
-            height=300,
+        fig.update_layout(
+            margin=dict(t=0, b=20, l=0, r=0),
+            height=350,
             showlegend=True
         )
-        st.plotly_chart(fig, width='stretch')
+        st.plotly_chart(fig, use_container_width=True)
     else:
         st.write("該当データがありません")
 

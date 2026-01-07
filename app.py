@@ -5,6 +5,7 @@ import time
 from datetime import datetime, timedelta
 import analyzer
 import os
+import base64
 from dotenv import load_dotenv
 
 # 環境変数の読み込み
@@ -14,7 +15,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or st.secrets.get("GEMINI_API_KEY",
 # ページ設定
 st.set_page_config(
     page_title="チャットログ分析ダッシュボード",
-    page_icon="📊",
+    page_icon="assets/icon_dashboard.png",
     layout="wide"
 )
 
@@ -29,6 +30,8 @@ st.markdown("""
     }
     h1, h2, h3 {
         color: #1B5E20 !important;
+        display: flex !important;
+        align-items: center !important;
     }
     /* 全てのボタン（ダウンロード、フィルタ等）の視認性向上 */
     button[kind="primary"], button[kind="secondary"], .stDownloadButton > button {
@@ -68,8 +71,21 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# --- アイコンユーティリティ ---
+def get_base64_of_bin_file(bin_file):
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
+def img_to_html(img_path, width=28):
+    try:
+        img_64 = get_base64_of_bin_file(img_path)
+        return f'<img src="data:image/png;base64,{img_64}" width="{width}" style="vertical-align: middle; margin-right: 10px; margin-bottom: 4px;">'
+    except Exception:
+        return ""
+
 # --- サイドバー ---
-st.sidebar.header("🔧 設定")
+st.sidebar.markdown(f"## {img_to_html('assets/icon_settings.png')} 設定", unsafe_allow_html=True)
 st.sidebar.markdown("---")
 
 # 期間フィルタ (デフォルトを60日間に延長)
@@ -77,17 +93,17 @@ today = datetime.now()
 start_date_val = today - timedelta(days=60)
 end_date_val = today
 
-st.sidebar.subheader("📅 期間フィルタ")
+st.sidebar.markdown(f"### {img_to_html('assets/icon_calendar.png', 24)} 期間フィルタ", unsafe_allow_html=True)
 start_date = st.sidebar.date_input("開始日", start_date_val)
 end_date = st.sidebar.date_input("終了日", end_date_val)
 
 apply_filter = st.sidebar.button("フィルタ適用", width='stretch')
 
 st.sidebar.markdown("---")
-st.sidebar.subheader("📥 エクスポート")
+st.sidebar.markdown(f"### {img_to_html('assets/icon_export.png', 24)} エクスポート", unsafe_allow_html=True)
 
 # --- メインエリア ---
-st.title("📊 チャットログ分析ダッシュボード")
+st.markdown(f"<h1>{img_to_html('assets/icon_dashboard.png', 40)} チャットログ分析ダッシュボード</h1>", unsafe_allow_html=True)
 st.markdown("### 仮想ヘルプAI 会話ログ分析")
 st.info(f"📍 データソース: 仮想ヘルプデスクチャット (最終更新: {today.strftime('%Y-%m-%d %H:%M')})")
 
@@ -139,7 +155,7 @@ category_counts = analyzer.aggregate_data(filtered_df)
 col1, col2 = st.columns([1, 1])
 
 with col1:
-    st.subheader("🔝 頻出キーワード TOP 10")
+    st.markdown(f"### {img_to_html('assets/icon_keywords.png', 28)} 頻出キーワード TOP 10", unsafe_allow_html=True)
     if keywords:
         kw_df = pd.DataFrame(keywords)
         kw_df.columns = ["キーワード", "出現回数", "割合 (%)"]
@@ -148,7 +164,7 @@ with col1:
         st.write("該当データがありません")
 
 with col2:
-    st.subheader("🍕 カテゴリ別集計")
+    st.markdown(f"### {img_to_html('assets/icon_piechart.png', 28)} カテゴリ別集計", unsafe_allow_html=True)
     if category_counts:
         fig = go.Figure(data=[go.Pie(
             labels=list(category_counts.keys()),
@@ -168,7 +184,7 @@ with col2:
 st.markdown("---")
 
 # 詳細ログ
-st.subheader("📑 詳細ログ表示")
+st.markdown(f"### {img_to_html('assets/icon_log.png', 28)} 詳細ログ表示", unsafe_allow_html=True)
 selected_cat = st.selectbox("カテゴリで絞り込み", ["すべて"] + list(category_counts.keys()))
 
 display_df = filtered_df.copy()

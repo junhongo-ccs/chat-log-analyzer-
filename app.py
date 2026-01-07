@@ -236,8 +236,8 @@ with col2:
             marker=dict(colors=['#81C784', '#FFF176', '#E57373', '#64B5F6', '#BA68C8'])
         )])
         fig.update_layout(
-            margin=dict(t=0, b=0, l=0, r=0),
-            height=350,
+            margin=dict(t=10, b=10, l=10, r=10),
+            height=380,
             showlegend=True,
             legend=dict(font=dict(size=14)) # 凡例テキストを本文サイズ(14px)に
         )
